@@ -1,0 +1,23 @@
+{
+  "name": "tic-tac-toe-server",
+  "version": "1.0.0",
+  "description": "A tic-tac-toe Socket.io server",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nickmagruder/tic-tac-toe-server.git"
+  },
+  "author": "Nick Magruder",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nickmagruder/tic-tac-toe-server/issues"
+  },
+  "homepage": "https://github.com/nickmagruder/tic-tac-toe-server#readme",
+  "dependencies": {
+    "socket.io": "^4.5.0"
+  }
+}
