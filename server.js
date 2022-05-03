@@ -20,19 +20,19 @@ io.on('connection', (client) => {
 
   client.on('checkUserName', (data) => {
     console.log(data);
-    let flag = false;
+    let boolean = false;
     for (let id in sockets) {
       if (sockets[id].userName === data.name) {
-        flag = true;
+        boolean = true;
         break;
       }
     }
-    if (!flag) {
+    if (!boolean) {
       sockets[client.id] = {
         userName: data.name,
       };
     }
-    client.emit('userNameResponse', !flag);
+    client.emit('userNameResponse', !boolean);
   });
 });
 
