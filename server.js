@@ -1,6 +1,7 @@
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const expressServer = createServer(app);
@@ -13,10 +14,51 @@ const io = new Server(expressServer, {
 
 let sockets = {};
 let users = {};
+let currentGames = {};
+
+let board = {
+  1: ' ',
+  2: ' ',
+  3: ' ',
+  4: ' ',
+  5: ' ',
+  6: ' ',
+  7: ' ',
+  8: ' ',
+  9: ' ',
+};
+
+let startingBoard = {
+  1: '1',
+  2: '2',
+  3: '3',
+  4: '4',
+  5: '5',
+  6: '6',
+  7: '7',
+  8: '8',
+  9: '9',
+};
+
+const winners = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+  [1, 4, 7],
+  [2, 5, 8],
+  [3, 6, 9],
+  [1, 5, 9],
+  [3, 5, 7],
+];
 
 io.on('connection', (client) => {
   console.log(client.id + ' has connected');
   client.emit('connected', { id: client.id });
+  /*   console.log(
+    'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    io.sockets.sockets,
+    'io.sockets.sockets'
+  ); */
 
   client.on('checkUserName', (data) => {
     let boolean = false;
@@ -32,8 +74,6 @@ io.on('connection', (client) => {
         isPlaying: false,
         gameId: null,
       };
-
-
     }
     client.emit('userNameResponse', !boolean);
   });
@@ -45,7 +85,6 @@ io.on('connection', (client) => {
         response.push({
           id: id,
           name: sockets[id].userName,
-
         });
       }
     }
@@ -53,7 +92,62 @@ io.on('connection', (client) => {
     client.broadcast.emit('newOpponent', {
       id: client.id,
       name: sockets[client.id].userName,
+    });
+  });
 
+  client.on('selectPlayer', (data) => {
+    let game_ID = uuidv4();
+    if (!sockets[data.id].isPlaying) {
+      sockets[data.id].isPlaying = true;
+      sockets[client.id].isPlaying = true;
+      sockets[data.id].gameID = game_ID;
+      sockets[client.id].gameID = game_ID;
+
+      currentGames[game_ID] = {
+        player1: client.id,
+        player2: data.id,
+        currentTurn: client.id,
+        playboard: {
+          1: ' ',
+          2: ' ',
+          3: ' ',
+          4: ' ',
+          5: ' ',
+          6: ' ',
+          7: ' ',
+          8: ' ',
+          9: ' ',
+        },
+        status: 'ongoing',
+        winner: null,
+        winningCombo: [],
+      };
+      currentGames[game_ID][client.id] = {
+        userName: sockets[client.id].userName,
+        sign: 'x',
+      };
+      currentGames[game_ID][data.id] = {
+        userName: sockets[data.id].userName,
+        sign: 'o',
+      };
+      // console.log('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', client, 'client');
+      client.join(game_ID);
+    }
+    console.log('connectOpponent, client.id', client.id);
+    client.emit('connectOpponent', {
+      opponentID: client.id,
+      gameId: sockets[client.id].gameID,
+      gameData: currentGames[sockets[client.id].gameID],
+    });
+  });
+
+  client.on('opponentConnected', (data) => {
+    console.log('opponentConnected client.id', client.id);
+    client.join(data.gameId);
+    io.to(sockets[client.id].gameID).emit('gameStarted', {
+      status: true,
+      gameId: sockets[client.id].gameID,
+      gameData: currentGames[sockets[client.id].gameID],
     });
   });
 });
