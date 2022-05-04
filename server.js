@@ -19,7 +19,6 @@ io.on('connection', (client) => {
   client.emit('connected', { id: client.id });
 
   client.on('checkUserName', (data) => {
-    console.log(data);
     let boolean = false;
     for (let id in sockets) {
       if (sockets[id].userName === data.name) {
@@ -30,9 +29,32 @@ io.on('connection', (client) => {
     if (!boolean) {
       sockets[client.id] = {
         userName: data.name,
+        isPlaying: false,
+        gameId: null,
       };
+
+
     }
     client.emit('userNameResponse', !boolean);
+  });
+
+  client.on('getPlayers', (data) => {
+    let response = [];
+    for (const id in sockets) {
+      if (id !== client.id && !sockets[id].is_playing) {
+        response.push({
+          id: id,
+          name: sockets[id].userName,
+
+        });
+      }
+    }
+    client.emit('getResponse', response);
+    client.broadcast.emit('newOpponent', {
+      id: client.id,
+      name: sockets[client.id].userName,
+
+    });
   });
 });
 
