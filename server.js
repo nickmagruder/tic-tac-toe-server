@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { createServer } = require('http');
-import { Server } from 'socket.io';
+const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
 const cors = require('cors');
 
