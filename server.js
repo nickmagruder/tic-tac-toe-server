@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const expressServer = createServer(app);
-const PORT = 3001;
+const PORT = (process.env.port || 3001);
 const io = new Server(expressServer, {
   cors: {
     origin: '*',
@@ -108,15 +108,15 @@ io.on('connection', (client) => {
         player2: data.id,
         currentTurn: client.id,
         playboard: {
-          1: ' ',
-          2: ' ',
-          3: ' ',
-          4: ' ',
-          5: ' ',
-          6: ' ',
-          7: ' ',
-          8: ' ',
-          9: ' ',
+          1: '#',
+          2: '#',
+          3: '#',
+          4: '#',
+          5: '#',
+          6: '#',
+          7: '#',
+          8: '#',
+          9: '#',
         },
         status: 'ongoing',
         winner: null,
@@ -130,7 +130,6 @@ io.on('connection', (client) => {
         userName: sockets[data.id].userName,
         sign: 'o',
       };
-      // console.log('CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', client, 'client');
       client.join(game_ID);
     }
     console.log('connectOpponent, client.id', client.id);
