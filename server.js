@@ -8,7 +8,12 @@ const app = express();
 app.use(cors());
 const expressServer = createServer(app);
 const PORT = process.env.port || 3001;
-const io = new Server(expressServer);
+const io = new Server(expressServer, {
+  cors: {
+    origin: `http://localhost:3000`,
+    methods: ['GET', 'POST'],
+  },
+});
 
 let sockets = {};
 let users = {};
