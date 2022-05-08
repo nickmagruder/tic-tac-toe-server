@@ -1,11 +1,14 @@
+require('dotenv').config();
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 const expressServer = createServer(app);
-const PORT = (process.env.port || 3001);
+const PORT = process.env.PORT;
 const io = new Server(expressServer, {
   cors: {
     origin: '*',
