@@ -1,6 +1,5 @@
 const express = require('express');
 const { createServer } = require('http');
-const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
 const cors = require('cors');
 
@@ -8,9 +7,9 @@ const app = express();
 app.use(cors());
 const expressServer = createServer(app);
 const PORT = process.env.port || 3001;
-const io = new Server(expressServer, {
+const io = require("socket.io")(expressServer, {
   cors: {
-    origin: `*`,
+    origin: 'http://localhost:3000/',
     methods: ['GET', 'POST'],
   },
 });
