@@ -11,7 +11,7 @@ const expressServer = createServer(app);
 const PORT = process.env.PORT;
 const io = new Server(expressServer, {
   cors: {
-    origin: 'https://tic-tac-toe-whoa.herokuapp.com/',
+    origin: 'http://tic-tac-toe-whoa.herokuapp.com/',
   },
 });
 
