@@ -19,7 +19,7 @@ let sockets = {};
 let users = {};
 let currentGames = {};
 
-let board = {
+/* let board = {
   1: ' ',
   2: ' ',
   3: ' ',
@@ -41,7 +41,7 @@ let startingBoard = {
   7: '7',
   8: '8',
   9: '9',
-};
+}; */
 
 const winners = [
   [1, 2, 3],
@@ -57,11 +57,6 @@ const winners = [
 io.on('connection', (client) => {
   console.log(client.id + ' has connected');
   client.emit('connected', { id: client.id });
-  /*   console.log(
-    'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-    io.sockets.sockets,
-    'io.sockets.sockets'
-  ); */
 
   client.on('checkUserName', (data) => {
     let boolean = false;
@@ -79,12 +74,13 @@ io.on('connection', (client) => {
       };
     }
     client.emit('userNameResponse', !boolean);
+    console.log('current sockets:', sockets);
   });
 
   client.on('getPlayers', (data) => {
     let response = [];
     for (const id in sockets) {
-      if (id !== client.id && !sockets[id].is_playing) {
+      if (id !== client.id && !sockets[id].isPlaying) {
         response.push({
           id: id,
           name: sockets[id].userName,
@@ -111,19 +107,20 @@ io.on('connection', (client) => {
         player2: data.id,
         currentTurn: client.id,
         playboard: {
-          1: '#',
-          2: '#',
-          3: '#',
-          4: '#',
-          5: '#',
-          6: '#',
-          7: '#',
-          8: '#',
-          9: '#',
+          1: null,
+          2: null,
+          3: null,
+          4: null,
+          5: null,
+          6: null,
+          7: null,
+          8: null,
+          9: null,
         },
         status: 'ongoing',
         winner: null,
         winningCombo: [],
+        message: null,
       };
       currentGames[game_ID][client.id] = {
         userName: sockets[client.id].userName,
@@ -133,24 +130,27 @@ io.on('connection', (client) => {
         userName: sockets[data.id].userName,
         sign: 'o',
       };
-      client.join(game_ID);
-    }
-    console.log('connectOpponent, client.id', client.id);
-    client.emit('connectOpponent', {
-      opponentID: client.id,
-      gameId: sockets[client.id].gameID,
-      gameData: currentGames[sockets[client.id].gameID],
-    });
-  });
+      const opponentSocketId = data.id;
+      const opponentSocket = sockets[opponentSocketId];
+      io.to(opponentSocket).to(client.id).socketsJoin(game_ID);
 
-  client.on('opponentConnected', (data) => {
-    console.log('opponentConnected client.id', client.id);
-    client.join(data.gameId);
-    io.to(sockets[client.id].gameID).emit('gameStarted', {
-      status: true,
-      gameId: sockets[client.id].gameID,
-      gameData: currentGames[sockets[client.id].gameID],
-    });
+      client.emit('gameStarted', {
+        clientId: data.id,
+        opponentID: client.id,
+        status: true,
+        gameId: sockets[client.id].gameID,
+        gameData: currentGames[sockets[client.id].gameID],
+      });
+
+      client.broadcast.emit('gameStarted', {
+        clientId: data.id,
+        opponentID: client.id,
+        status: true,
+        gameId: sockets[client.id].gameID,
+        gameData: currentGames[sockets[client.id].gameID],
+      });
+      client.broadcast.emit('excludePlayers', { one: client.id, two: data.id });
+    }
   });
 });
 
